@@ -6,7 +6,7 @@
 \usepackage{caratula}
 
 
-\titulo{Trabajo práctico}
+\titulo{Trabajo práctico N°1}
 \subtitulo{Especificacion de TADs}
 
 \fecha{\today}
@@ -17,7 +17,7 @@
 \integrante{Choque, Leandro}{252/25}{leandroch2002@gmail.com}
 \integrante{Musi, Santino}{965/24}{santinomusi1@gmail.com}
 \integrante{Rojas, Damian}{209/25}{dam.rojas1@gmail.com}
-\integrante{Martell, Juan Bautista}{622/25}{Juanbamartell@hotmail.com}
+\integrante{Martell, Juan Bautista}{622/25}{juanbamartell@hotmail.com}
 % \integrante{Apellido, Nombre2}{002/01}{email2@dominio.com} %
 
 
@@ -37,231 +37,343 @@
 
 \maketitle
 
-\section{Supongo que acá iría una descripción}
+\section{Aclaraciones}
 
-Breve descripción.
-
-Luego veremos bien el formato, esto de momento es para tener un esqueleto.
+En proc chequearCopias, en el aux porcentajeRespuestasIgualAdyacente aseguramos que se cuenten las respuestas vacías como coincidencias, debido a la aclaración de uno de los profesores, y en aux porcentajeIgualAula comparamos el examen entero con el \textbf{resto} del alumnado según lo especificado en la consigna.
 
 \section{Especificacion}
 
+$Nota\ ES\ \Z$\\
+$Respuesta\ ES\ Char$\\
+$Examen\ ES\ \seq{Respuesta}$\\
+$Coordenada\ ES\ struct\struct{f:\Z, c:\Z}$\\
+$Alumno\ ES\ struct\struct{coord:Coordenada, examen:Examen}$\\
+$Aula\ ES\ \seq{\seq{Alumno}}$\\
+\\
 % Acá arrancamos el TAD --------------------------------------------------
 \begin{tad}{EdR}
 
-% SECCIÓN DE DUDAS/COMENTARIOS --------------------------------------------------
-
-% Preguntar si estudiantes necesita nombre o identificación
-% Preguntar por \yLuego
-% Preguntar por igualdad(), si basta con '=' en arrays
-% Preguntar por uso de metavariables como renombre de var interna
+% SECCIÓN DE DUDAS/COMENTARIOS --------
 
 % RENOMBRE DE TIPOS --------------------------------------------------
 
 % Aula: Seq[Seq[Alumno]] - Doble secuencia para representar
-% Alumno: Struct {asiento: Coordenada, examen: Examen}
+% Alumno: Struct {coord: Coordenada, examen: Examen}
 % Coordenada: Struct{f:Z, c:Z}
-% Examen: seq[Paso]
-% Paso = Seq[Respuesta]
+% Examen: Seq[Respuesta]
 % Respuesta: Char
+% Nota: Z
 
 \obs{aula}{Aula}
 \\
-\obs{solucion}{Paso}
+\obs{solucion}{Examen}
 \\
-\obs{entregas}{\seq{Alumno}}
+\obs{entregas}{\conj{Alumno}}
 \\
-\\
-
-% Metodo EDR --------------------------------------------------
-% Falta una forma de chequear que todos los alumnos tengan su coordenada
+\obs{copiones}{\conj{Alumno}}
+\subsection{proc EdR}
+% Metodo EdR --------------------------------------------------
 \begin{proc}{EdR}
 {
 \In dimensionAula: \Z,
-\In s: Paso,
+\In s: Examen,
 \In cantEstudiantes: \Z
 }{
 \Tipo{EdR}
 }
     \requiereLargo{
-        (dimensionAula > 0) \yLuego
+    dimensionAula > 0 \yLuego
     \\ rtaValida(s) \yLuego
     \\ cantValidaEstudiantes(dimensionAula, cantEstudiantes)}
-    % Agregar asegura que todos los examenes que esten, esten en blancos
     \aseguraLargo{
-        (\norm{res.aula} = dimensionAula) \yLuego
+    \norm{res.aula} = dimensionAula \yLuego
     \\ aulaCuadrada(res.aula) \yLuego
+    \\ cuantosEstudiantes(res.aula) = cantEstudiantes \yLuego
+    \\ examenesInicializados(res.aula, s) \yLuego
     \\ noHayAlumnosJuntos(res.aula) \yLuego
-    \\ (cuantosEstudiantes(res.aula) = cantEstudiantes) \yLuego
-    \\ examenesSinResponder(res.aula) \yLuego
-    \\ (res.solucion = s) \yLuego 
-    \\ (res.entregas = \langle \rangle)
+    \\ todosAlumnosConCoordenada(res.aula) \yLuego
+    \\ res.solucion = s \yLuego 
+    \\ res.entregas = \conj{} \yLuego
+    \\ res.copiones = \conj{}
     }
 \end{proc}
 
-% True si las respuestas del paso estan en el rango de opciones (o vacía)
-\predLargo{rtaValida}{s: Paso}{
+% Todos los espacios en el aula tienen su coordenada en el struct
+\predLargo{todosAlumnosConCoordenada}{a: aula}{
+    \paraTodo{c1}{Coordenada}{coordenadaValida(c1,a) \implicaLuego
+    \\(a[c1.f][c1.c].coord.f = c1.f \land a[c1.f][c1.c].coord.c = c1.c)}
+}
+% Las respuestas del examen estan en el rango de opciones
+\predLargo{rtaValida}{s: Examen}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{s} \implicaLuego s[i] \in \conj{"0","1","2","3","4","5","6","7","8","9"}}
 }
+\\ \\ \\ \\
+% si c y f estan entre las dimensiones de aula la coordenada es valida 
+\predLargo{coordenadaValida}{c1:Coordenada, a:Aula}{0 \leq c1.f < \norm{a} \land 0 \leq c1.c < \norm{a}}
 
-% True si la cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
-\predLargo{cantValidaEstudiantes}{a: Aula, e: \Z}{
-    (e \leq ifThenElseFi(mod(\norm{a},2)==0, \frac{\norm{a}^ 2}{2}, \frac{\norm{a} + 1}{2} * \norm{a}))    
+% La cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
+\predLargo{cantValidaEstudiantes}{a, c: \Z}{
+    (c \leq ifThenElse(mod(a,2)=0, \frac{a^ 2}{2}, \frac{a + 1}{2} * a))    
 }
 
-%\pred{esPar}{a: \Z}{
-%    (mod(a, 2) = 0)
-%}
-
+% el aula tiene misma cantidad de filas y columnas
 \predLargo{aulaCuadrada}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \norm{a[i]} = \norm{a}}
 }
 
-% Ahora se fija si estan vacíos o no
+% si hay un alumno en el asiento entonces, el que le sigue tiene que ser vacio
 \predLargo{noHayAlumnosJuntos}{a: Aula}{
     \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego 
-    \\ \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]}-1 \implicaLuego (a[i][j].examen \neq \langle \rangle \implica a[i][j+1].examen = \langle \rangle)}}
+    \\ \paraTodo{j}{\Z}{(0 \leq j < \norm{a[i]}-1 \yLuego a[i][j].examen \neq \langle \rangle) \implicaLuego a[i][j+1].examen = \langle \rangle}}
 }
 
-% Tambien chequea por los vacios
-\aux{cuantosEstudiantes}{a: Aula}{\Z}
-    $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElseFi(a[i][j].examen \neq \langle \rangle,1,0)$
+% cuantos estudiantes hay en el aula
+\aux{cuantosEstudiantes}{a: Aula}{\Z} \\
+    $\sum_{i=0}^{\norm{a}-1} \sum_{j=0}^{\norm{a[i]}-1} ifThenElse(a[i][j].examen \neq \langle \rangle,1,0)$
+\\
 
-% Agrego la funcionalidad de acceder al examen del alumno con el "." porque es struct
-\predLargo{examenesSinResponder}{a: Aula}{
-    \paraTodo{i}{\Z}{0 \leq i < \norm{a} \implicaLuego \paraTodo{j}{\Z}{0 \leq j < \norm{a[i]} \implicaLuego examenSinResponder(a[i][j].examen)}}
+% todos los examenes en el aula estan sin responder y son del largo correcto
+\predLargo{examenesInicializados}{a: Aula, sol: Examen}{
+    \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a) \yLuego suExamen(c1, a) \neq \langle \rangle) \implicaLuego 
+    \\ examenInicializado(a[c1.f][c1.c].examen, sol)}
 }
 
-% Es el complemento del pred de arriba, se fija que haya 1 paso solo de examen y que todas sus respuestas sean ""
-\predLargo{examenSinResponder}{e: Examen}{
-    (\norm{e} = 1 \land \paraTodo{i}{\Z}{0 \leq i < \norm{e[0]} \implica e[0][i] = ""}) \lor \norm{e} = 0
-    % agregue lo de |e| = 0 porque sino da false cuando no hay examen
+% El examen no tiene ninguna respuesta
+\predLargo{examenInicializado}{e: Examen, sol: Examen}{
+    \norm{e} = \norm{sol} \yLuego
+    \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = ""}
 }
 
+% devuelve el examen del alumno en c1
+\aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1.f][c1.c].examen$
+
+\subsection{proc igualdad}
 % Metodo igualdad --------------------------------------------------
 \begin{proc}{igualdad}
 {
-\In edr1,edr2: EdR,
+\In edr_1,edr_2: EdR,
 }{
 \Tipo{Bool}
 }
     \requiere{True}
-    \aseguraLargo{(res = True) \leftrightarrow
-    \\ (edr1.aula = edr2.aula) \land
-    \\ (edr1.solucion = edr2.solucion) \land
-    \\ (edr1.entregas = edr2.entregas)
+    \aseguraLargo{res = True \leftrightarrow
+    \\ (edr_1.aula = edr_2.aula \land
+    \\ edr_1.solucion = edr_2.solucion \land
+    \\ edr_1.entregas = edr_2.entregas \land
+    \\ edr_1.copiones = edr_2.copiones)
     }
 \end{proc}
 
+\subsection{proc copiarse}
 % Metodo copiarse --------------------------------------------------
+
+% CAMBIAR EL METODO COPIARSE YA QUE NO EXISTE MAS ultimoPasoExamen()
+
 \begin{proc}{copiarse}
 {
-\In alumno: Alumno, % que pase las coordenadas o su examen?
+\In a1: Alumno,
 \Inout edr: EdR 
 }{
 \Tipo{}
 }
-    % la otra forma q teniamos de chequear se indefinia pq no chequeabamos q i, j esten en rango |a|
-    % y lo de chequear que tenga alumnos cercanos me parece mucho para el requiere
     \requiereLargo{ 
-        perteneceAlumno(alumno, edr.aula) \yLuego
-        \\ edr = edr0 \yLuego
-        \\ alumno.asiento.x = x0 \yLuego
-        \\ alumno.asiento.y = y0 \yLuego
-        } % Que el alumno exista 
-    % si las coordenadas estan en aula, son adyacentes a alumno y tienen un ejercicio resuelto q alumno no tiene, entonces alumno tiene la misma respuesta en edr0
-    \aseguraLargo{(\exists i, j: \Z)(coordenadaValidas(i, j, edr.Aula) \yLuego 
-    \\ adyacente(<i, j>, alumno.asiento) \yLuego
-    \\ (\exists k:\Z)(alumno.examen[\norm{alumno.examen}-1][k]="" \land
-    \\ edr.Aula[i][j].examen[\norm{examen}][k]\neq"" \land
-    \\ edr0.Aula[x0][y0] = copiarEjercicio(edr.Aula[i][j].examen, alumno))) \yLuego
-    % edr.Aula[i][j].examen[\norm{examen}][k] = edr0.Aula[x0][y0].examen[\norm{alumno.examen}][k]))\yLuego
-    % si no es alumno entonces queda igual
-    \\ \paraTodo p \Z{\paraTodo q \Z{(coordenadaValida(p,q, edr0.Aula) \land x0 \neq p \land y0 \neq q) \implicaLuego 
-    \\ edr.Aula[p][q] = edr0.Aula[p][q]}} \yLuego
-    % el resto esta igual
-    \\ edr0.solucion = edr.solucion \yLuego 
-    \\ edr0.entregas = edr.entregas
+        perteneceAlumno(a1, edr.aula) \yLuego
+        \\ \existe{a2}{Alumno}{ perteneceAlumno(a2, edr.aula)\ \yLuego\ enRango(a1.coord, a2.coord, edr.aula) \yLuego 
+        \existe{i}{\Z}{a1.examen[i] = "" \land a2.examen[i] \neq ""}} \yLuego
+        \\ (edr_0 = edr)
+    }
+    \aseguraLargo{
+        \existe{a3}{Alumno}{perteneceAlumno(a3, edr_0.aula) \yLuego enRango(a1.coord, a3.coord, edr_0.aula) \yLuego 
+        \existe{j}{\Z}{suExamen(a1.coord, edr_0.aula)[j]= "" \land \\
+        suExamen(a3.coord, edr_0.aula)[j] \neq ""}\land \\
+        (suExamen(a1.coord, edr.aula)[j] = suExamen(a3.coord, edr.aula)[j]) \land\\
+        mismosEjerciciosMenos(j, suExamen(a1.coord, edr.aula), suExamen(a1.coord, edr_0.aula))} \yLuego
+        todosEstudiantesIgualesMenos(\langle a1.coord \rangle ,edr.aula,edr0.aula)\yLuego 
+        \\ (edr_0.solucion = edr.solucion) \yLuego
+        \\ (edr_0.entregas = edr.entregas) \yLuego
+        \\ (edr_0.copiones = edr.copiones) \yLuego
     } 
 \end{proc}
+\\
 
-% las coordenadas del alumno estan en el aula y el examen es el mismo
-\predLargo{perteneceAlumno}{e:alumno, a:Aula}{
-    (\exists i, j:\Z)(coordenadaValida(<i,j>, edr.aula) \yLuego
-    \\ alumno.asiento.x = i \land alumno.asiento.y = j \yLuego
-    \\ alumno.examen = a[i][j].examen)
+% a1 y a2 tienen la misma norma y son cuadradas
+\predLargo{mismasDimensiones}{a1,a2: Aula}{
+    \norm{a1}=\norm{a2} \land aulaCuadrada(a1) \land aulaCuadrada(a2)
 }
 
-% x e y estan entre 0 y norma del aula, por ende la coordenada es valida 
-\pred{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.x < \norm{a} \land 0 \leq c.y < \norm{a}}\\
+% Las aulas son iguales en todas las coordenadas menos en las especificadas en coords 
+\predLargo{todosEstudiantesIgualesMenos}{coords: \seq{Coordenada}, a0, a1: Aula}{
+        mismasDimensiones(a0, a1)\land\\ 
+        \paraTodo{c1}{Coordenada}{(coordenadaValida(c1, a0) \land \neg(c1 \in coords)) \implicaLuego a1[c1.f][c1.c] = a0[c1.f][c1.c]}
+}
+
+% e0 es igual a e1 en todos los ejercicios menos en i
+\predLargo{mismosEjerciciosMenos}{i: \Z, e0, e1: Examen}{
+    \norm{e1} = \norm{e0} \yLuego\\
+    \paraTodo{j}{\Z}{(0 \leq j < \norm{e0} \land j \neq i)
+    \implicaLuego e0[j] = e1[j]}
+}
+
+% las coordenadas del alumno estan en el aula y el examen es el mismo
+\predLargo{perteneceAlumno}{e: Alumno, a:Aula}{
+    (coordenadaValida(e.coord, a) \yLuego suExamen(e.coord, a) \neq \langle \rangle \yLuego\\
+    suExamen(e.cord, a) = e.examen)
+}
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
-\predLargo{adyacente}{c0, c1: Coordenada, a: Aula}{
-    coordenadaValida(c0, a) \land coordenadaValida(c1, a) \land
-    \\ (c0.x \neq c1.x \land c0.y \neq c1.y) \land
-    \\ ((-2 \leq c1.x - c0.x \leq 2 \land c1.y - c0.y = 0) \lor
-    \\ (c1.x - c0.x = 0 \land 0 < c1.x -c0.x \leq 2))
-} 
-
-% Metodo publicarResolucion --------------------------------------------------
+\predLargo{enRango}{c1, c2: Coordenada, a: Aula}{
+    coordenadaValida(c1, a) \land coordenadaValida(c2, a) \land
+    \\ ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
+    \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
+}
+\subsection{proc consultarDarkWeb}
+% Metodo consultarDarkWeb --------------------------------------------------
 \begin{proc}{consultarDarkWeb}
 {
-\In s: Paso,
+\In s: Examen,
 \In posiblesAccesos: \Z,
 \Inout edr: EdR
 }{}
     \requiereLargo{
-    rtaValida(s) \yLuego
-    \\posiblesAccesos \geq 0 \yLuego}
-    \asegura{res}
+    edr = edr_0 \yLuego
+    \\rtaValida(s) \yLuego
+    \\\norm{s} = \norm{edr.solucion} \yLuego
+    \\posiblesAccesos \geq 0}
+    \aseguraLargo{
+    \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
+    \\\existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \yLuego \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr.aula) \yLuego 
+    suExamen(c1, edr_0.aula) \neq \langle \rangle \yLuego\\
+    suExamen(c1,edr.aula) = s)}} \yLuego
+    \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
+    \\edr.solucion = edr_0.solucion \yLuego
+    \\edr.entregas = edr_0.entregas \yLuego
+    \\edr.copiones = edr_0.copiones \yLuego
+}
 \end{proc}
-
+\subsection{proc resolver}
 % Metodo resolver --------------------------------------------------
 \begin{proc}{resolver}
 {
-\In alumno: Coordenada,
-\Inout edr: EdR
+\Inout edr: EdR,
+\Inout a: Alumno,
+\In e: \seq{Examen}
 }{
-\Tipo{Paso}
+\Tipo{\seq{Examen}}
 }
     \requiereLargo{
-    (existeAlumno(alumno)) \yLuego
-    \\(\exists i:\Z)(0 \leq i < \norm{alumno.examen[0]} \yLuego alumno.examen[\norm{alumno.examen}][k]=="")}
-    \asegura{res}
+    perteneceAlumno(a, edr.aula)\yLuego\\
+    examenInicializado(a.examen, edr.solucion)\yLuego\\
+    \norm{e} > 0 \yLuego\\
+    edr_0 = edr \yLuego\\
+    a_0 = a
+    }
+    \aseguraLargo{
+        % vv el examen q devolvemos tiene t+1 pasos
+        \norm{res} = \norm{e} + 1\yLuego\\
+        % aca me aseguro que en el paso t+1 resuelvo un ejercicio que en el paso t no estaba resuelto vv
+        hayNuevoEjercicioResuelto(e[\norm{e}-1], a.examen)\land\\
+        % vv aca me fijo que el resto de pasos esten igual
+        res = e ++ \langle a.examen\rangle \yLuego\\
+        % vv me aseguro de q la coord de a no cambio
+        a.coord = a_0.coord \yLuego\\
+        % vv igualo el examen en edr con el examen q devuelvo
+        edr.aula[a.coord.f][a.coord.c] = a\yLuego\\
+        % vv Todo el resto sigue igual
+        todosEstudiantesIgualesMenos(\langle a.coord \rangle, edr.aula, edr_0.aula)\yLuego\\ 
+        edr_0.solucion = edr.solucion \yLuego\\
+        edr_0.entregas = edr.entregas \yLuego\\
+        edr_0.copiones = edr.copiones \yLuego
+    }
 \end{proc}
 
+% existe solo 1 ejercicio con respuesta nueva en e1 que en e0 no estaba
+\predLargo{hayNuevoEjercicioResuelto}{e0, e1: Examen}{
+        (\exists k: \Z)(0 \leq k < \norm{e0} \yLuego
+        mismosEjerciciosMenos(k, e1, e0) \land\\
+        \lnot respondio(k, e0) \land
+        respondio(k, e1))
+}
+
+% el ejercicio i del examen fue resuelto
+\predLargo{respondio}{i: \Z, e: Examen}{
+    (0 \leq i < \norm{e}) \yLuego\\
+    e[i]\in \conj{"0","1","2","3","4","5","6","7","8","9"}
+}
+
+\subsection{proc entregar}
 % Metodo entregar --------------------------------------------------
 \begin{proc}{entregar}
 {
-\In alumno: Coordenada
+\In a: Alumno,
+\Inout edr: EdR
 }{
-\Tipo{EdR}
 }
-    \requiere{True} % Que el alumno exista
-    \asegura{res} % que aula[i][j] pase a estar vacío? Es suficiente?
+    \requiereLargo{
+        (perteneceAlumno(a, edr.Aula)) \yLuego
+        \\ (edr = edr_0)
+    } 
+    \aseguraLargo{
+        % CAMBIO EL a.examen, ANTES REVISABA EL ULTIMO PASO
+        (edr.entregas = edr_0.entregas \cup \conj{a}) \yLuego
+        \\ (suExamen(a.coord, edr.aula) = \langle \rangle) \yLuego
+        \\ (todosEstudiantesIgualesMenos(\langle a.coord \rangle,edr,edr_0)) \yLuego
+        \\ (edr.solucion = edr_0.solucion) \yLuego
+        \\ (edr.copiones = edr_0.copiones) \yLuego
+    }
 \end{proc}
 
+\subsection{proc chequearCopias}
 % Metodo chequearCopias --------------------------------------------------
 \begin{proc}{chequearCopias}
 {
-\In alumnos: seq<Alumno> % Creo que no recibe nada o recibe un EdR
+\In edr: EdR
 }{
-\Tipo{seq<Alumno>}
+\Tipo{\seq{Alumno}}
 }
-    \requiere{True} % Si no recibe nada va True, a lo mejor recibe un EdR pero entonces también iría True, mientras sea un EdR válido sirve
-    \asegura{res} % Acá hay que ver cómo poner lo de propoción de rtas equivalentes a compañero cercano >60% y eso, cómo medirlo, o eso sería muy implementativo?
-    % Quedaría tipo, para todo alumno en aula, si esSimilarACercano(aula[i][j].examen) o esSimilarAAlumnado(aula[i][j].examen) entonces se concatena a la secuencia
+    \requiere{todosEntregaron(edr)} 
+    \aseguraLargo{
+        \paraTodo {a1}{Alumno}{(a1 \in edr.entregas) \implicaLuego ((a1 \in res) \leftrightarrow 
+        \\ (\existe{a2}{Alumno}{a2 \in edr.entregas  \land  enRango(a1.coord, a2.coord, edr.aula) \land 
+        \\ porcentajeRespuestasIgualAdyacente(a1, a2) > 60} \ \lor \\porcentajeIgualAula(a1, edr.entregas) > 25))}\yLuego
+        \\ \norm{edr.copiones} = \norm{res} \yLuego
+        \\ \paraTodo{a3}{Alumno}{a3 \in edr.copiones \leftrightarrow a3 \in res}
+        }
 \end{proc}
 
+% devuelve el porcentaje de respuestas iguales entre 2 alumnos
+\aux{porcentajeRespuestasIgualAdyacente}{a1, a2: Alumno}{\Z}
+\\    $(\sum_{i=0}^{\norm{a1.examen}-1} IfThenElse((a1.examen[i] = a2.examen[i]),1,0)) \cdot \frac{100}{\norm{a1.examen}}$
+\\
+
+% devuelve el porcentaje de alumnos que tienen el mismo examen que a1 en una secuencia
+\aux{porcentajeIgualAula}{a:Alumno, entregas:\conj{Alumno}}{\Z}
+\\ $(\sum_{i \in entregas}IfThenElse( a \neq i\land a.examen = i.examen,1,0)) \cdot \frac{100}{\norm{entregas}-1}$
+\\
+
+% No queda ningun estudiante en el aula
+\predLargo{todosEntregaron}{edr: EdR}{
+    \norm{edr.entregas} > 0 \land
+    \\\paraTodo{c1}{Coordenada}{coordenadaValida(c1,edr.aula) \implicaLuego suExamen(c1, edr.aula) = \langle \rangle}
+}
+
+\subsection{proc corregir}
 % Metodo corregir --------------------------------------------------
 \begin{proc}{corregir} 
-{ %Acá dice que tenemos que corregir los examenes de los que no fueron sospechosos de copiarse, pero no podemos llamar un proc adentro de otro, o no?
-\Inout edr, EdR
+{
+\In edr:EdR
 }{
-\Tipo{seq<<Alumno, Nota>>}
+\Tipo{\seq{tupla\tupla{Alumno, Nota}}}
 }
-    \requiere{True}
-    \asegura{res}
+    \requiere{todosEntregaron(edr)}
+    \aseguraLargo{
+        \paraTodo{a}{Alumno}{(a \in edr.entregas \land \lnot (a \in edr.copiones)) \implicaLuego
+        \\ (tupla\tupla{a, nota(a, edr.solucion)} \in res)}
+}
 \end{proc}
+
+% Suma todas las respuestas correctas, lo divide por la cantidad de respuestas y lo multiplica por 10 (standar)
+\aux{nota}{a: Alumno, sol: Examen}{\Z}
+    \\ $((\sum_{i=0}^{\norm{sol}-1}ifThenElse(a.examen[i] = sol[i], 1, 0))) \cdot \frac{10}{\norm{sol}}$
 
 \end{tad}
 
