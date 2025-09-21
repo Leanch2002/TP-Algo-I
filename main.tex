@@ -109,7 +109,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
 }
 \\ \\ \\ \\
 % si c y f estan entre las dimensiones de aula la coordenada es valida 
-\predLargo{coordenadaValida}{c:Coordenada, a:Aula}{0 \leq c.f < \norm{a} \land 0 \leq c.c < \norm{a}}
+\predLargo{coordenadaValida}{c1:Coordenada, a:Aula}{0 \leq c1.f < \norm{a} \land 0 \leq c1.c < \norm{a}}
 
 % La cantidad de estudiantes a lo sumo no hace que haya alumnos juntos
 \predLargo{cantValidaEstudiantes}{a, c: \Z}{
@@ -143,6 +143,9 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \norm{e} = \norm{sol} \yLuego
     \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = ""}
 }
+
+% devuelve el examen del alumno en c1
+\aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1.f][c1.c].examen$
 
 \subsection{proc igualdad}
 % Metodo igualdad --------------------------------------------------
@@ -223,11 +226,6 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \\ ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
     \\ (c2.c = c1.c \land  c2.f - c1.f = 1))
 }
-
-% devuelve el examen del alumno en c1
-\aux{suExamen}{c1:Coordenada, a: Aula}{Examen} \ $a[c1.f][c1.c].examen$
-
-
 \subsection{proc consultarDarkWeb}
 % Metodo consultarDarkWeb --------------------------------------------------
 \begin{proc}{consultarDarkWeb}
@@ -244,7 +242,7 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
     \aseguraLargo{
     \existe {n}{\Z}{0 \leq n \leq posiblesAccesos \land 0 \leq n \leq cuantosEstudiantes(edr.aula)} \land
     \\\existe {seCopian}{\seq{Coordenada}}{\norm{seCopian} = n \yLuego \\\paraTodo{c1}{Coordenada}{c1 \in seCopian \implica \\(coordenadaValida(c1,edr.aula) \yLuego 
-    suExamen(c1, edr.aula) \neq \langle \rangle \yLuego\\
+    suExamen(c1, edr_0.aula) \neq \langle \rangle \yLuego\\
     suExamen(c1,edr.aula) = s)}} \yLuego
     \\todosEstudiantesIgualesMenos(seCopian,edr.aula, edr_0.aula) \yLuego
     \\edr.solucion = edr_0.solucion \yLuego
@@ -276,6 +274,8 @@ $Aula\ ES\ \seq{\seq{Alumno}}$\\
         hayNuevoEjercicioResuelto(e[\norm{e}-1], a.examen)\land\\
         % vv aca me fijo que el resto de pasos esten igual
         res = e ++ \langle a.examen\rangle \yLuego\\
+        % vv me aseguro de q la coord de a no cambio
+        a.coord = a_0.coord \yLuego\\
         % vv igualo el examen en edr con el examen q devuelvo
         edr.aula[a.coord.f][a.coord.c] = a\yLuego\\
         % vv Todo el resto sigue igual
