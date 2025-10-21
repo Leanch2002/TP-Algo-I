@@ -155,8 +155,9 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \Tipo{}
 }
     \requiereLargo{ 
-        a1 \in edr.aula \yLuego\\
-        \existe{a2}{Alumno}{a2\in edr.aula \land\\
+        a1 \in edr.aula \land\\
+        \lnot (a1 \in edr.entregas) \land \\
+        \existe{a2}{Alumno}{a2\in edr.aula \yLuego\\
         puedeCopiarse(a1, a2) \land\\
         respondioAlgunEjercicio(edr.aula[a2])}\land\\
         edr_0 = edr
