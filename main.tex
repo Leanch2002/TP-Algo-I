@@ -242,6 +242,8 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
     a \in edr.aula \yLuego\\
     examenInicializado(edr.aula[a], edr.solucion)\land\\
     \norm{e} > 1 \land\\
+    examenInicializado(e[0], edr.solucion) \land \\
+    \paraTodo{i}{\Z}{0 < i < \norm{e} \implicaLuego hayNuevoEjercicioResuelto(e[i],e[i-1])} \land \\
     edr_0 = edr
     }
     \aseguraLargo{
@@ -263,7 +265,7 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
     \paraTodo{j}{\Z}{(0 \leq j < \norm{e0} \land j \neq i)
     \implicaLuego e0[j] = e1[j]}
 }
-
+\\ \\ \\
 % existe solo 1 ejercicio con respuesta nueva en e1 que en e0 no estaba
 \predLargo{hayNuevoEjercicioResuelto}{e0, e1: Examen}{
         (\exists k: \Z)(0 \leq k < \norm{e0} \yLuego\\
@@ -327,7 +329,7 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \predLargo{todosEntregaron}{edr: EdR}{
     \norm{edr.entregas} > 0 \land \norm{edr.aula} = 0
 }
-
+\\ \\ \\
 \predLargo{esSospechoso}{edr: EdR, a1: Alumno}{
     \existe{a2}{Alumno}{a2 \in edr.entregas \land  puedeCopiarse(a1, a2, edr.aula) \yLuego 
     \\ porcentajeRespuestasIgualAdyacente(edr.entregas[a1], edr.entregas[a2]) > 60} \ \lor \\porcentajeIgualAula(edr.entregas[a1], edr.entregas) > 25
