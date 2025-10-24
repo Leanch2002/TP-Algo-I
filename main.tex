@@ -88,7 +88,7 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
     \aseguraLargo{
     \norm{res.aula} = cantEstudiantes \land\\
     coordenadasValidas(res.aula, dimensionAula) \land
-    \\ examenesInicializados(res.aula, s) \land
+    \\ examenesInicializados(res.aula, \norm{s}) \land
     \\ noHayAlumnosJuntos(res.aula) \land
     \\ res.solucion = s \land 
     \\ res.entregas = dicc\struct{}}
@@ -118,13 +118,13 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 }
 
 % todos los examenes en el aula estan sin responder y son del largo correcto
-\predLargo{examenesInicializados}{a: Aula, sol: Examen}{
-    \paraTodo{c}{Alumno}{c\in a \rightarrow examenInicializado(a[c], sol)}
+\predLargo{examenesInicializados}{a: Aula, largo: \Z}{
+    \paraTodo{c}{Alumno}{c\in a \rightarrow examenInicializado(a[c], largo)}
 }
 
 % El examen no tiene ninguna respuesta
-\predLargo{examenInicializado}{e: Examen, sol: Examen}{
-    \norm{e} = \norm{sol} \land
+\predLargo{examenInicializado}{e: Examen, largo: \Z}{
+    \norm{e} = largo \land
     \paraTodo{i}{\Z}{0 \leq i < \norm{e} \implicaLuego e[i] = -1}
 }
 
@@ -155,12 +155,10 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \Tipo{}
 }
     \requiereLargo{ 
-        a1 \in edr.aula \land\\
+        (a1 \in edr.aula) \land\\
         \lnot (a1 \in edr.entregas) \land \\
-        \existe{a2}{Alumno}{a2\in edr.aula \yLuego\\
-        puedeCopiarse(a1, a2) \land\\
-        respondioAlgunEjercicio(edr.aula[a2])}\land\\
-        edr_0 = edr
+        \existe{a2}{Alumno}{a2\in edr.aula \yLuego puedeCopiarse(a1, a2)}\land\\
+        (edr_0 = edr)
     }
     \aseguraLargo{
         \existe{i}{\Z}{0\leq i < \norm{edr.aula[a1]}\yLuego \existe{a2}{Alumno}{
@@ -180,21 +178,20 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 %     \norm{a1}=\norm{a2}
 % }
 
+\predLargo{puedeCopiarse}{a: Aula, c1, c2: Alumno}{
+    enRangoDeCopiarse(c1, c2) \land \\
+    \existe{i}{\Z}{0 \leq i \leq \norm{a[c1]} \implicaLuego respondio(i, a[c2]) \land \neg (respondio(i, a[c1]))}
+}
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
-\predLargo{puedeCopiarse}{c1, c2: Alumno}{
-    ((\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor
-    (c2.c = c1.c \land  c2.f - c1.f = 1))
+\predLargo{enRangoDeCopiarse}{c1, c2: Alumno}{
+    (\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor 
+    (c2.c = c1.c \land  c2.f - c1.f = 1)
 }
 
 \predLargo{respondio}{
     i: \Z, e: Examen}{0 \leq i < \norm{e} \yLuego 0 \leq e[i] \leq 9
 }
-
-\predLargo{respondioAlgunEjercicio}{e:Examen}{
-    \existe{i}{\Z}{respondio(i, e)}
-}
-\\ \\ \\ \\ \\ \\ \\
 
 \subsection{proc consultarDarkWeb}
 % Metodo consultarDarkWeb --------------------------------------------------
@@ -240,9 +237,9 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 }
     \requiereLargo{
     a \in edr.aula \yLuego\\
-    examenInicializado(edr.aula[a], edr.solucion)\land\\
+    examenInicializado(edr.aula[a], \norm{edr.solucion})\land\\
     \norm{e} > 1 \land\\
-    examenInicializado(e[0], edr.solucion) \land \\
+    examenInicializado(e[0], \norm{edr.solucion}) \land \\
     \paraTodo{i}{\Z}{0 < i < \norm{e} \implicaLuego hayNuevoEjercicioResuelto(e[i],e[i-1])} \land \\
     edr_0 = edr
     }
