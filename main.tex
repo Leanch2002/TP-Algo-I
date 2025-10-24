@@ -154,17 +154,14 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 }{
 \Tipo{}
 }
-    \requiereLargo{ 
-        (a1 \in edr.aula) \land\\
+    \requiereLargo{
         \lnot (a1 \in edr.entregas) \land \\
-        \existe{a2}{Alumno}{a2\in edr.aula \yLuego puedeCopiarse(edr.aula,a1, a2)}\land\\
+        \existe{i}{\Z}{\existe{a2}{Alumno}{puedeCopiarse(edr.aula,a1, a2, i)}} \\
         (edr_0 = edr)
     }
     \aseguraLargo{
-        \existe{i}{\Z}{0\leq i < \norm{edr.aula[a1]}\yLuego \existe{a2}{Alumno}{
-            a2\in edr_0.aula \land\\
-            puedeCopiarse(edr_0.aula, a1, a2)\yLuego
-            respondio(i, edr_0.aula[a2]) \land \lnot(respondio(i,edr_0.aula[a1])) \land
+        \existe{i}{\Z}{\existe{a2}{Alumno}{
+            puedeCopiarse(edr_0.aula, a1, a2, i) \yLuego \\
             edr.aula = setKey(edr_0.aula, a1, setAt(edr.aula[a1], i, edr_0.aula[a2][i]))}}\land\\
             edr_0.solucion = edr.solucion \land \\
             edr_0.entregas = edr.entregas
@@ -172,24 +169,20 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \end{proc}
 \\
 
-% a1 y a2 tienen la misma norma y son cuadradas
-% \predLargo{mismasDimensiones}{a1,a2: Aula}{
-%     \norm{a1}=\norm{a2}
-% }
-
-\predLargo{puedeCopiarse}{a: Aula, c1, c2: Alumno}{
-    enRangoDeCopiarse(c1, c2) \land \\
-    \existe{i}{\Z}{0 \leq i \leq \norm{a[c1]} \implicaLuego respondio(i, a[c2]) \land \neg (respondio(i, a[c1]))}
+\predLargo{puedeCopiarse}{aula: Aula, a1, a2: Alumno, i: \Z}{
+    (a1 \in aula) \land (a2 \in aula) \yLuego \\
+    enRangoDeCopiarse(a1, a2) \land \\
+    (0 \leq i \leq \norm{aula[a1]}) \yLuego respondio(i, aula[a2]) \land \neg (respondio(i, aula[a1]))
 }
 
 % las coordenadas estan dentro del aula y c0 esta a distancia |2| de c1 en x o esta directamente adelante en y
-\predLargo{enRangoDeCopiarse}{c1, c2: Alumno}{
-    (\norm{c2.c - c1.c} = 2 \land c2.f = c1.f) \lor 
-    (c2.c = c1.c \land  c2.f - c1.f = 1)
+\predLargo{enRangoDeCopiarse}{a1, a2: Alumno}{
+    (\norm{a2.c - a1.c} = 2 \land a2.f = a1.f) \lor 
+    (a2.c = a1.c \land  a2.f - a1.f = 1)
 }
 
-\predLargo{respondio}{
-    i: \Z, e: Examen}{0 \leq i < \norm{e} \yLuego 0 \leq e[i] \leq 9
+\predLargo{respondio}{i: \Z, e: Examen}{
+    0 \leq i < \norm{e} \yLuego 0 \leq e[i] \leq 9
 }
 
 \subsection{proc consultarDarkWeb}
