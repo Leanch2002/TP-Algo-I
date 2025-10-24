@@ -157,13 +157,13 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
     \requiereLargo{ 
         (a1 \in edr.aula) \land\\
         \lnot (a1 \in edr.entregas) \land \\
-        \existe{a2}{Alumno}{a2\in edr.aula \yLuego puedeCopiarse(a1, a2)}\land\\
+        \existe{a2}{Alumno}{a2\in edr.aula \yLuego puedeCopiarse(edr.aula,a1, a2)}\land\\
         (edr_0 = edr)
     }
     \aseguraLargo{
         \existe{i}{\Z}{0\leq i < \norm{edr.aula[a1]}\yLuego \existe{a2}{Alumno}{
             a2\in edr_0.aula \land\\
-            puedeCopiarse(a1, a2)\yLuego
+            puedeCopiarse(edr_0.aula, a1, a2)\yLuego
             respondio(i, edr_0.aula[a2]) \land \lnot(respondio(i,edr_0.aula[a1])) \land
             edr.aula = setKey(edr_0.aula, a1, setAt(edr.aula[a1], i, edr_0.aula[a2][i]))}}\land\\
             edr_0.solucion = edr.solucion \land \\
