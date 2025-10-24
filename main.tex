@@ -164,11 +164,10 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
         \existe{i}{\Z}{0\leq i < \norm{edr.aula[a1]}\yLuego \existe{a2}{Alumno}{
             a2\in edr_0.aula \land\\
             puedeCopiarse(a1, a2)\yLuego
-            respondio(i, edr_0.aula[a2]) \land\\
-            edr.aula = setKey(edr_0.aula, a1, setAt(edr.aula[a1], i, edr_0.aula[a2][i]))\\
-        }}\land\\
-        edr_0.solucion = edr.solucion \land \\
-        edr_0.entregas = edr.entregas
+            respondio(i, edr_0.aula[a2]) \land \lnot(respondio(i,edr_0.aula[a1])) \land
+            edr.aula = setKey(edr_0.aula, a1, setAt(edr.aula[a1], i, edr_0.aula[a2][i]))}}\land\\
+            edr_0.solucion = edr.solucion \land \\
+            edr_0.entregas = edr.entregas
     } 
 \end{proc}
 \\
@@ -328,7 +327,7 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 }
 \\ \\ \\
 \predLargo{esSospechoso}{edr: EdR, a1: Alumno}{
-    \existe{a2}{Alumno}{a2 \in edr.entregas \land  puedeCopiarse(a1, a2, edr.aula) \yLuego 
+    \existe{a2}{Alumno}{a2 \in edr.entregas \land  enRangoDeCopiarse(a1, a2) \yLuego 
     \\ porcentajeRespuestasIgualAdyacente(edr.entregas[a1], edr.entregas[a2]) > 60} \ \lor \\porcentajeIgualAula(edr.entregas[a1], edr.entregas) > 25
 }
 
