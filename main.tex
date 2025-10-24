@@ -39,6 +39,8 @@
 
 \section{Aclaraciones}
 
+En la construcción de los exámenes consideramos al -1 como el indicador de pregunta sin responder.
+
 En proc \textit{chequearCopias}, en el aux \textit{porcentajeRespuestasIgualAdyacente} aseguramos que se cuenten las respuestas vacías como coincidencias, debido a la aclaración de uno de los profesores, y en aux porcentajeIgualAula comparamos el examen entero con el \textbf{resto} del alumnado según lo especificado en la consigna.
 
 \section{Especificacion}
@@ -301,11 +303,11 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \\
 
 % devuelve el porcentaje de respuestas iguales entre 2 alumnos
-\aux{porcentajeRespuestasIgualAdyacente}{e1, e2: Examen}{\Z}
+\aux{porcentajeRespuestasIgualAdyacente}{e1, e2: Examen}{\R}
 \\    $(\sum_{i=0}^{\norm{e1}-1} IfThenElse((e1[i] = e2[i]),1,0)) \cdot \frac{100}{\norm{e1}}$
 \\
 
-\aux{porcentajeIgualAula}{a:Alumno, entregas:dicc\struct{Alumno, Examen}}{\Z}
+\aux{porcentajeIgualAula}{a:Alumno, entregas:dicc\struct{Alumno, Examen}}{\R}
 \\ $(\sum_{i \in entregas}IfThenElse( a \neq i\land entregas[a] = entregas[i],1,0)) \cdot \frac{100}{\norm{entregas}-1}$
 \\
 
