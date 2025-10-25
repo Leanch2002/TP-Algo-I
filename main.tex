@@ -85,6 +85,7 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 }
     \requiereLargo{
     dimensionAula > 0 \land
+    \\ \norm{s} > 0 \land
     \\ rtaValida(s) \land
     \\ losAlumnosEntran(dimensionAula, cantEstudiantes)}
     \aseguraLargo{
@@ -157,9 +158,10 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \Tipo{}
 }
     \requiereLargo{
+        a1 \in edr.aula \land \\
         \lnot (a1 \in edr.entregas) \land \\
         \existe{i}{\Z}{\existe{a2}{Alumno}{puedeCopiarse(edr.aula,a1, a2, i)}} \\
-        (edr_0 = edr)
+        edr_0 = edr
     }
     \aseguraLargo{
         \existe{i}{\Z}{\existe{a2}{Alumno}{
@@ -172,8 +174,8 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 \\
 
 \predLargo{puedeCopiarse}{aula: Aula, a1, a2: Alumno, i: \Z}{
-    (a1 \in aula) \land (a2 \in aula) \yLuego \\
-    enRangoDeCopiarse(a1, a2) \land \\
+    a1 \in aula \land a2 \in aula \land \\
+    enRangoDeCopiarse(a1, a2) \yLuego \\
     (0 \leq i \leq \norm{aula[a1]}) \yLuego respondio(i, aula[a2]) \land \neg (respondio(i, aula[a1]))
 }
 
@@ -216,7 +218,7 @@ $Aula\ ES\ dicc\struct{Alumno, Examen}$\\
 
 % Las aulas son iguales en todas las coordenadas menos en las especificadas en coords 
 \predLargo{todosEstudiantesIgualesMenos}{alumnos: \conj{Alumno}, a0, a1: Aula}{
-        \paraTodo{a}{Alumno}{(a \in a0 \land a \in a1 \land a \notin alumnos) \implicaLuego a1[a] = a0[a]}
+        \paraTodo{a}{Alumno}{(a \in a0 \land a \in a1 \land \lnot(a \in alumnos)) \implicaLuego a1[a] = a0[a]}
 }
 
 \subsection{proc resolver}
